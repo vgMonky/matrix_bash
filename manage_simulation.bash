@@ -4,15 +4,38 @@
 usage() {
     echo "Usage: $0 <command> [options]"
     echo "Commands:"
-    echo "  start     Start automated matrix cycling and rendering"
+    echo "  start     Start automated matrix cycling and rendering with arrow key control"
     echo "    Options for start:"
     echo "      -s <seconds>   Interval between cycles (required)"
     echo "      -d <directory> Specify the directory (required)"
     echo "      -r, --rule <rule_script> Specify the rule script (required)"
-    echo "  stop      Stop the automated process"
-    echo "    Options for stop:"
-    echo "      -d <directory> Specify the directory (required)"
     exit 1
+}
+
+# Function to read current direction
+get_current_direction() {
+    if [ -f direction.txt ]; then
+        cat direction.txt
+    else
+        echo "right"  # Default direction if file doesn't exist
+    fi
+}
+
+# Function to change direction
+change_direction() {
+    local new_dir="$1"
+    local current_dir=$(get_current_direction)
+
+    # Check if new direction is opposite to current
+    case "$current_dir" in
+        up)    [[ "$new_dir" == "down" ]]  && return ;;
+        down)  [[ "$new_dir" == "up" ]]    && return ;;
+        left)  [[ "$new_dir" == "right" ]] && return ;;
+        right) [[ "$new_dir" == "left" ]]  && return ;;
+    esac
+
+    echo "$new_dir" > direction.txt
+    echo "Direction changed to: $new_dir"
 }
 
 # Function to start the automated process
@@ -35,7 +58,7 @@ start_automation() {
         exit 1
     fi
 
-    # Start the background process
+    # Start the background process for matrix cycling
     (
         while true; do
             # Acquire lock
@@ -55,7 +78,25 @@ start_automation() {
 
     # Save the PID of the background process
     echo $! > "$pid_file"
-    echo "Automation started with PID $(cat "$pid_file") using rule script $rule_script. Use '$0 stop -d $dir' to terminate."
+    echo "Automation started with PID $(cat "$pid_file") using rule script $rule_script."
+
+    # Start arrow key control
+    echo "Use arrow keys to change direction. Press 'q' to quit."
+    while true; do
+        read -n 1 -s
+        case "$REPLY" in
+            A) change_direction "up"    ;;  # Up arrow
+            B) change_direction "down"  ;;  # Down arrow
+            C) change_direction "right" ;;  # Right arrow
+            D) change_direction "left"  ;;  # Left arrow
+            q) 
+                echo "Quitting..."
+                stop_automation "$dir"
+                exit 0 
+                ;;
+            *) : ;;  # Ignore other keys
+        esac
+    done
 }
 
 # Function to stop the automated process
@@ -97,13 +138,6 @@ case "$command" in
             usage
         fi
         start_automation "$interval" "$directory" "$rule_script"
-        ;;
-    stop)
-        if [ "$#" -ne 2 ] || [ "$1" != "-d" ]; then
-            echo "Error: -d <directory> is required for stop command"
-            usage
-        fi
-        stop_automation "$2"
         ;;
     *)
         echo "Unknown command: $command"

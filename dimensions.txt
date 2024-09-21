@@ -1,1 +1,1 @@
-Dimensions: 5 x 5
+Dimensions: 10 x 15
