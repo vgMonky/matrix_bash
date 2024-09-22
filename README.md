@@ -3,11 +3,10 @@
 This project is a cellular automaton simulation implemented in Bash. You can interact with the simulation by changing the "Rule" variable. 
 It was developed on NixOS and has not been tested on other operating systems.
 
-
-![Matrix Bash Simulation - Initial](segment_A_optimized.gif)
-
-![Matrix Bash Simulation - Final](segment_B_optimized.gif)
-
+<p float="left">
+  <img src="segment_A_optimized.gif" width="40%" />
+  <img src="segment_B_optimized.gif" width="40%" /> 
+</p>
 
 ## Prerequisites
 
