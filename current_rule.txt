@@ -1,1 +1,1 @@
-life_propagation.bash
+rules/geometric_propagation.bash

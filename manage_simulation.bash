@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# Check if rules directory exists
+if [ ! -d "rules" ]; then
+    echo "Error: rules/ directory not found. Please ensure it exists and contains the rule scripts."
+    exit 1
+fi
+
 # Function to print usage information
 usage() {
     echo "Usage: $0 <command> [options]"
@@ -8,7 +14,7 @@ usage() {
     echo "    Options for start:"
     echo "      -s <seconds>   Interval between cycles (required)"
     echo "      -d <directory> Specify the directory (required)"
-    echo "      -r, --rule <rule_script> Specify the rule script (required)"
+    echo "      -r, --rule <rule_script> Specify the rule script (required, located in rules/ directory)"
     exit 1
 }
 
@@ -54,13 +60,13 @@ start_automation() {
     fi
 
     # Check if the rule script exists
-    if [ ! -f "$rule_script" ]; then
-        echo "Error: Rule script $rule_script not found."
+    if [ ! -f "rules/$rule_script" ]; then
+        echo "Error: Rule script rules/$rule_script not found."
         exit 1
     fi
 
     # Initialize current rule file
-    echo "$rule_script" > "$current_rule_file"
+    echo "rules/$rule_script" > "$current_rule_file"
 
     # Start the background process for matrix cycling
     (
@@ -86,14 +92,14 @@ start_automation() {
     # Save the PID of the background process
     echo $! > "$pid_file"
     automation_pid=$!
-    echo "Automation started with PID $automation_pid using rule script $rule_script."
+    echo "Automation started with PID $automation_pid using rule script rules/$rule_script."
 
     # Trap SIGINT and SIGTERM
     trap 'stop_automation "$dir"; exit 0' SIGINT SIGTERM
 
     # Start arrow key control with timeout
     echo "Use arrow keys to change direction. Press 'space' or '0' to wipe and add life."
-    echo "Press '1' for linear propagation, '2' for simple propagation. Press 'q' to quit."
+    echo "Press '1'-'6' to switch between propagation rules. Press 'q' to quit."
     while true; do
         if read -t 1 -n 1 -s key; then
             if [[ $key == $'\x20' ]]; then  # Check for space key (ASCII 32)
@@ -111,29 +117,29 @@ start_automation() {
                     ;;
                 1)
                     echo "Switching to linear propagation..."
-                    echo "linear_propagation.bash" > "$current_rule_file"
+                    echo "rules/linear_propagation.bash" > "$current_rule_file"
                     ;;
                 2)
                     echo "Switching to simple propagation..."
-                    echo "simple_propagation.bash" > "$current_rule_file"
+                    echo "rules/simple_propagation.bash" > "$current_rule_file"
                     ;;
                 3)
-   		    echo "Switching to wave propagation..."
-		    echo "wave_propagation.bash" > "$current_rule_file"
-		    ;;
-	        4)
-		    echo "Switching to balance propagation..."
-		    echo "balance_propagation.bash" > "$current_rule_file"
-		    ;;
-		5)
-		    echo "Switching to classic Life propagation..."
-		    echo "life_propagation.bash" > "$current_rule_file"
-		    ;;
-		6)
-		    echo "Switching to mycelium propagation..."
-		    echo "mycelium_propagation.bash" > "$current_rule_file"
-		    ;;    
-      	        q)
+                    echo "Switching to wave propagation..."
+                    echo "rules/wave_propagation.bash" > "$current_rule_file"
+                    ;;
+                4)
+                    echo "Switching to geometric propagation..."
+                    echo "rules/geometric_propagation.bash" > "$current_rule_file"
+                    ;;
+                5)
+                    echo "Switching to classic Life propagation..."
+                    echo "rules/life_propagation.bash" > "$current_rule_file"
+                    ;;
+                6)
+                    echo "Switching to mycelium propagation..."
+                    echo "rules/mycelium_propagation.bash" > "$current_rule_file"
+                    ;;
+                q)
                     echo "Quitting..."
                     stop_automation "$dir"
                     exit 0
@@ -179,7 +185,7 @@ case "$command" in
             case $1 in
                 -s) interval="$2"; shift ;;
                 -d) directory="$2"; shift ;;
-                -r|--rule) rule_script="$2"; shift ;;
+                -r|--rule) rule_script="${2#rules/}"; shift ;;
                 *) echo "Unknown parameter: $1"; usage ;;
             esac
             shift
