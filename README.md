@@ -56,6 +56,12 @@ You can interact with the simulation by changing the "Rule" variable.
 - Life Propagation: Implements Conway's Game of Life rules.
 - Mycelium Propagation: Simulates the growth patterns of fungal networks.
 
+## Simulation in Action
+
+![Matrix Bash Simulation - Initial](segment_A_optimized.gif)
+
+![Matrix Bash Simulation - Final](segment_B_optimized.gif)
+
 ## Notes
 
 - This simulation was developed and tested on NixOS. Compatibility with other operating systems is not guaranteed.
