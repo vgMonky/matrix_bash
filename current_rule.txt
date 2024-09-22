@@ -1,1 +1,1 @@
-simple_propagation.bash
+wave_propagation.bash

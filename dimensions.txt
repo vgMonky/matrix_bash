@@ -1,1 +1,1 @@
-Dimensions: 10 x 15
+Dimensions: 100 x 100

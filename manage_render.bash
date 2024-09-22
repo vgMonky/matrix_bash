@@ -24,9 +24,23 @@ update_render() {
     # Create a temporary file for the new render
     temp_file=$(mktemp)
 
+    # ANSI color codes
+    RED='\033[0;31m'
+    NC='\033[0m' # No Color
+
     while IFS= read -r line; do
-        echo "$line" | grep -oP '\(\d+,\d+,\K[01](?=\))' | tr '\n' ' ' >> "$temp_file"
-        echo >> "$temp_file"
+        echo "$line" | awk '{
+            for (i=1; i<=NF; i++) {
+                split($i, a, ",")
+                gsub(/[()]/, "", a[3])
+                if (a[3] == 1) {
+                    printf "'"$RED"'1'"$NC"' "
+                } else {
+                    printf "0 "
+                }
+            }
+            printf "\n"
+        }' >> "$temp_file"
     done < "$matrix_file"
 
     # Check if render.txt exists and if it's different from the new render

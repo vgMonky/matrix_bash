@@ -117,7 +117,11 @@ start_automation() {
                     echo "Switching to simple propagation..."
                     echo "simple_propagation.bash" > "$current_rule_file"
                     ;;
-                q)
+                3)
+   		    echo "Switching to wave propagation..."
+		    echo "wave_propagation.bash" > "$current_rule_file"
+		    ;;
+	    	q)
                     echo "Quitting..."
                     stop_automation "$dir"
                     exit 0
