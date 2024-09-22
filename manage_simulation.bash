@@ -121,7 +121,19 @@ start_automation() {
    		    echo "Switching to wave propagation..."
 		    echo "wave_propagation.bash" > "$current_rule_file"
 		    ;;
-	    	q)
+	        4)
+		    echo "Switching to balance propagation..."
+		    echo "balance_propagation.bash" > "$current_rule_file"
+		    ;;
+		5)
+		    echo "Switching to classic Life propagation..."
+		    echo "life_propagation.bash" > "$current_rule_file"
+		    ;;
+		6)
+		    echo "Switching to mycelium propagation..."
+		    echo "mycelium_propagation.bash" > "$current_rule_file"
+		    ;;    
+      	        q)
                     echo "Quitting..."
                     stop_automation "$dir"
                     exit 0
