@@ -45,6 +45,7 @@ start_automation() {
     local rule_script="$3"
     local pid_file="$dir/automation.pid"
     local lock_file="$dir/automation.lock"
+    local current_rule_file="$dir/current_rule.txt"
 
     # Check if the process is already running
     if [ -f "$pid_file" ]; then
@@ -58,6 +59,9 @@ start_automation() {
         exit 1
     fi
 
+    # Initialize current rule file
+    echo "$rule_script" > "$current_rule_file"
+
     # Start the background process for matrix cycling
     (
         while true; do
@@ -65,8 +69,11 @@ start_automation() {
             exec 200>$lock_file
             flock -n 200 || { echo "Failed to acquire lock. Exiting."; exit 1; }
 
-            # Run cycle with the specified rule and update
-            ./manage_matrix.bash cycle -r "$rule_script" -d "$dir"
+            # Read the current rule script
+            current_rule=$(cat "$current_rule_file")
+
+            # Run cycle with the current rule and update
+            ./manage_matrix.bash cycle -r "$current_rule" -d "$dir"
             ./manage_render.bash update -d "$dir"
 
             # Release lock
@@ -78,24 +85,52 @@ start_automation() {
 
     # Save the PID of the background process
     echo $! > "$pid_file"
-    echo "Automation started with PID $(cat "$pid_file") using rule script $rule_script."
+    automation_pid=$!
+    echo "Automation started with PID $automation_pid using rule script $rule_script."
 
-    # Start arrow key control
-    echo "Use arrow keys to change direction. Press 'q' to quit."
+    # Trap SIGINT and SIGTERM
+    trap 'stop_automation "$dir"; exit 0' SIGINT SIGTERM
+
+    # Start arrow key control with timeout
+    echo "Use arrow keys to change direction. Press 'space' or '0' to wipe and add life."
+    echo "Press '1' for linear propagation, '2' for simple propagation. Press 'q' to quit."
     while true; do
-        read -n 1 -s
-        case "$REPLY" in
-            A) change_direction "up"    ;;  # Up arrow
-            B) change_direction "down"  ;;  # Down arrow
-            C) change_direction "right" ;;  # Right arrow
-            D) change_direction "left"  ;;  # Left arrow
-            q) 
-                echo "Quitting..."
-                stop_automation "$dir"
-                exit 0 
-                ;;
-            *) : ;;  # Ignore other keys
-        esac
+        if read -t 1 -n 1 -s key; then
+            if [[ $key == $'\x20' ]]; then  # Check for space key (ASCII 32)
+                key=' '
+            fi
+            case "$key" in
+                A) change_direction "up"    ;;  # Up arrow
+                B) change_direction "down"  ;;  # Down arrow
+                C) change_direction "right" ;;  # Right arrow
+                D) change_direction "left"  ;;  # Left arrow
+                ' '|0) # Space key or '0' key
+                    echo "Wiping matrix and adding life..."
+                    ./manage_matrix.bash wipe -d "$dir"
+                    ./manage_matrix.bash life -d "$dir"
+                    ;;
+                1)
+                    echo "Switching to linear propagation..."
+                    echo "linear_propagation.bash" > "$current_rule_file"
+                    ;;
+                2)
+                    echo "Switching to simple propagation..."
+                    echo "simple_propagation.bash" > "$current_rule_file"
+                    ;;
+                q)
+                    echo "Quitting..."
+                    stop_automation "$dir"
+                    exit 0
+                    ;;
+                *) : ;;  # Ignore other keys
+            esac
+        fi
+        # Check if the automation process is still running
+        if ! kill -0 $automation_pid 2>/dev/null; then
+            echo "Automation process has stopped unexpectedly."
+            stop_automation "$dir"
+            exit 1
+        fi
     done
 }
 
@@ -106,8 +141,8 @@ stop_automation() {
 
     if [ -f "$pid_file" ]; then
         pid=$(cat "$pid_file")
-        kill "$pid"
-        rm "$pid_file"
+        kill $pid 2>/dev/null
+        rm -f "$pid_file"
         echo "Automation process (PID: $pid) has been terminated."
     else
         echo "No running automation process found."
