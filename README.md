@@ -26,11 +26,21 @@ You can interact with the simulation by changing the "Rule" variable.
 1. Open two terminal windows and navigate to the project directory in both.
 
 2. In Terminal A (for visualization), run:
+
    ```
    watch -c -n 0.1 cat render.txt
    ```
 
-3. In Terminal B (to start the simulation), run:
+3. In Terminal B run:
+
+   - To change the matrix size:
+
+   ```
+   ./manage_simulation.bash create -x 10 -y 10 -d . 
+   ```
+
+   - To start the simulation:
+
    ```
    ./manage_simulation.bash start -s 0.1 -d . -r linear_propagation.bash
    ```
