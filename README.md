@@ -36,7 +36,7 @@ You can interact with the simulation by changing the "Rule" variable.
    - To change the matrix size:
 
    ```
-   ./manage_simulation.bash create -x 10 -y 10 -d . 
+   ./manage_matrix.bash create -x 10 -y 10 -d . 
    ```
 
    - To start the simulation:
