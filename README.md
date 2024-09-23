@@ -1,8 +1,8 @@
 # Matrix Bash Simulation
 
-This project is a cellular automaton simulation implemented in Bash. You can interact with the simulation by changing the "Rule" variable. 
-It was developed on NixOS and has not been tested on other operating systems.
-
+This project is a cellular automaton simulation implemented in Bash. You can interact with the simulation by changing the "Rule" variable. 1 = life , 0 = void.
+> :warning: **Warning:** It was developed on NixOS and has not been tested on other operating systems.
+<br>
 <p float="left">
   <img src="segment_A_optimized.gif" width="40%" />
   <img src="segment_B_optimized.gif" width="40%" /> 
@@ -51,7 +51,7 @@ It was developed on NixOS and has not been tested on other operating systems.
    ```
 
 4. Control the simulation:
-   - Use arrow keys to change the global direction of propagation(only affects some rules).
+   - Use arrow keys to change the global direction of propagation (only applies on rules).
    - Use number keys (1-6) to change the rule of the simulation:
      1: Linear Propagation
      2: Simple Propagation
@@ -59,13 +59,13 @@ It was developed on NixOS and has not been tested on other operating systems.
      4: Geometric Propagation
      5: Life Propagation (Conway's Game of Life)
      6: Mycelium Propagation
-   - Press '0' to wipe out everything and restart.
+   - Press '0' to wipe out everything and restart with 1 cell.
    - Press 'q' to quit the simulation.
 
 ## Rules Description
 
 - Linear Propagation: Cells move in a straight line based on the global direction.
-- Simple Propagation: [Brief description]
+- Simple Propagation: Propagate to all adjacent cells
 - Wave Propagation: Creates wave-like patterns based on the global direction.
 - Geometric Propagation: Forms geometric shapes and patterns without randomness.
 - Life Propagation: Implements Conway's Game of Life rules.
